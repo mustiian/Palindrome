@@ -29,19 +29,19 @@ public:
                 m_Start(start), m_End(end)
     {
         for (int i = 0; i < size; ++i) {
-            m_Song.insert( {i, TTon(i)} );
+            m_Song.emplace_back( TTon(i) );
         }
     }
     void InsertNeighbour( int position, int neighbour, char ton );
 private:
-    map<int, TTon> m_Song;
+    vector<TTon> m_Song;
     map<int, set<string>> m_Words;
     int m_Start;
     int m_End;
 };
 
 void CKoledy::InsertNeighbour(int position, int neighbour, char ton) {
-    m_Song.at(position).InsertNeighbour(neighbour, ton);
+    m_Song[position].InsertNeighbour(neighbour, ton);
 }
 
 int main(){
