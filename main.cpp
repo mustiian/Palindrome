@@ -1,5 +1,8 @@
 #include <iostream>
 #include <map>
+#include <set>
+#include <vector>
+
 using namespace std;
 
 const int MAX_POSITION = 500;
@@ -14,6 +17,7 @@ public:
     char GetNeighbourTon( int neighbour ){
         return m_Neighbours.at(neighbour);
     }
+
 private:
     int m_Position;
     map<int, char> m_Neighbours;
@@ -31,6 +35,7 @@ public:
     void InsertNeighbour( int position, int neighbour, char ton );
 private:
     map<int, TTon> m_Song;
+    map<int, set<string>> m_Words;
     int m_Start;
     int m_End;
 };
