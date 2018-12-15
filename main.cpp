@@ -33,14 +33,15 @@ public:
             m_Song.emplace_back( TTon(i) );
         }
     }
-    bool DeleteNoneEndElements( int position );
     void InsertNeighbour( int position, int neighbour, char ton );
     bool GetAllWords ( int startPosition );
     void InsertWordsToSong( int position, int neiPosition, char ton );
+    void InsertWordsToSongReverse( int position, int neiPosition, char ton );
     int  CountAllPalindromes();
 private:
     vector<TTon> m_Song;
     map<int, vector<string>> m_Words;
+    map<int, vector<string>> m_Words_rev;
     int m_Start;
     int m_End;
 };
@@ -54,6 +55,7 @@ bool CKoledy::GetAllWords(int position) {
 
     if ( position == m_End ){                                               /// IF THE LAST POSITION:
         m_Words[m_End].emplace_back("");                                    /// INSERT NOTHING
+        m_Words_rev[m_End].emplace_back("");
         return true;
     }
 
@@ -63,12 +65,15 @@ bool CKoledy::GetAllWords(int position) {
 
         if ( m_Words.find( neighbourPosition ) != m_Words.end() ){          /// IF NEIGHBOUR HAS ALL WORDS:
               InsertWordsToSong(position, neighbourPosition, neighbourTon); /// INSERT WORDS WITH NEW CHAR IN THIS POSITION
+              InsertWordsToSongReverse(position, neighbourPosition, neighbourTon);
               gotoEnd = true;
         }
         else {                                                              /// ELSE NEIGHBOUR FIND ALL HIS NEIGHBOURS WORDS
             gotoEnd = GetAllWords(neighbourPosition);
-            if ( gotoEnd )                                                  /// IF POSITION GO TO END: INSERT WORDS
+            if ( gotoEnd )    {                                              /// IF POSITION GO TO END: INSERT WORDS
                 InsertWordsToSong(position, neighbourPosition, neighbourTon);
+                InsertWordsToSongReverse(position, neighbourPosition, neighbourTon);
+            }
         }
     }
     return gotoEnd;
@@ -80,36 +85,23 @@ void CKoledy::InsertWordsToSong(int position, int neiPosition, char ton) {
     }
 }
 
-int CKoledy::CountAllPalindromes() {
-    int count = 0;
-    for ( const auto& word: m_Words[m_Start] ){
-        string reverse_word(word);
-        reverse(reverse_word.begin(), reverse_word.end());
-        if (reverse_word == word)
-            count++;
-        count %= 1000000007;
+void CKoledy::InsertWordsToSongReverse(int position, int neiPosition, char ton) {
+    for ( const string& word: m_Words_rev.at( neiPosition ) ){
+        m_Words_rev[position].emplace_back(word + ton);
     }
-    return count % 1000000007;
 }
 
-bool CKoledy::DeleteNoneEndElements(int position) {
-    bool deleteElement = true;
-    if ( position == m_End ){
-        return false;
-    }
-    cout << m_Song[position].GetNeighbours().size() << endl;
+int CKoledy::CountAllPalindromes() {
+    int count = 0;
 
-    for ( const auto& neighbour: m_Song[position].GetNeighbours() ){
-        int neighbourPosition = neighbour.first;
-
-        deleteElement = DeleteNoneEndElements(neighbourPosition);
+    for (size_t i = 0; i <  m_Words[m_Start].size(); ++i) {
+        if ( m_Words[m_Start][i] == m_Words_rev[m_Start][i] ){
+            count++;
+            count %= 1000000007;
+        }
     }
 
-    if (deleteElement){
-        m_Song.erase(m_Song.begin()+position);
-    }
-
-    return deleteElement;
+    return count;
 }
 
 int main(){
@@ -131,7 +123,7 @@ int main(){
             koledy.InsertNeighbour(pos, neighbour, ton);
         }
     }
-    //koledy.DeleteNoneEndElements( start );
+
     koledy.GetAllWords( start );
     cout << koledy.CountAllPalindromes() << endl;
     return 0;
